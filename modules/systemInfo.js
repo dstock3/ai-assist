@@ -4,7 +4,9 @@ const getSystemData = async () => {
   const cpu = await system.cpu();
   const mem = await system.mem();
   const cpuUsage = await system.currentLoad();
-  console.log(cpuUsage)
+  const processes = await system.processes();
+  const sortedProcesses = processes.list.sort((a, b) => b.cpu - a.cpu);
+  const topProcesses = sortedProcesses.slice(0, 5);
 
   /*
   const cpuUsage = await system.currentLoad({ interval: 1000 });
@@ -32,7 +34,7 @@ const getSystemData = async () => {
     topProcesses,
   };
   */
- return { cpu, mem, cpuUsage }
+ return { cpu, mem, cpuUsage, topProcesses }
 };
 
 module.exports = { getSystemData };
