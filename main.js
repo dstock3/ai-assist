@@ -1,29 +1,19 @@
-const { Configuration, OpenAIApi } = require('openai');
-const { getSystemData } = require('./modules/systemInfo');
-require('dotenv').config();
+const express = require('express');
+const { getGeneralInfo } = require('./chat/generalSystem');
 
-const run = async () => {
-  const openai = new OpenAIApi(new Configuration({ apiKey: process.env.API_KEY }));
-  
-  const { cpu, mem, cpuUsage, topProcesses } = await getSystemData();
+const app = express();
+const port = process.env.PORT || 3000;
 
-  const messages = [
-    {
-      role: 'system',
-      content: `You are analyzing a personal computer, collecting data, and looking for ways to optimize it.`
-    },
-    {
-        role: 'user',
-        content: `My CPU data is as follows: ${JSON.stringify(cpu)}, and the current load is ${JSON.stringify(cpuUsage)}. My RAM data is as follows: ${JSON.stringify(mem)}. The top processes are as follows: ${JSON.stringify(topProcesses)}. Summarize this data in plain English based solely on the information provided. As of right now, what is the status of the system in terms of performance?`
-    }
-  ];
+app.get('/general-system-info', async (req, res) => {
+  try {
+    const result = await getGeneralInfo();
+    res.send(result.data.choices[0].message.content);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred while retrieving system information');
+  }
+});
 
-  const completion = await openai.createChatCompletion({ model: 'gpt-3.5-turbo', messages });
-  console.log(completion.data.choices);
-};
-
-run();
-
-
-
-
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
